@@ -1,12 +1,13 @@
-# Payload Website Template
+# Payload Website Template with MCP Integration
 
-This is the official [Payload Website Template](https://github.com/payloadcms/payload/blob/main/templates/website). Use it to power websites, blogs, or portfolios from small to enterprise. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
+This is the official [Payload Website Template](https://github.com/payloadcms/payload/blob/main/templates/website), extended with **AI-powered content management** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io). Use it to power websites, blogs, or portfolios from small to enterprise. This repo includes a fully-working backend, enterprise-grade admin panel, a beautifully designed production-ready website, and **intelligent content auditing tools**.
 
 This template is right for you if you are working on:
 
 - A personal or enterprise-grade website, blog, or portfolio
 - A content publishing platform with a fully featured publication workflow
-- Exploring the capabilities of Payload
+- AI-assisted content management and optimization
+- Exploring the capabilities of Payload and MCP
 
 Core features:
 
@@ -21,6 +22,7 @@ Core features:
 - [Search](#search)
 - [Redirects](#redirects)
 - [Jobs and Scheduled Publishing](#jobs-and-scheduled-publish)
+- [MCP Plugin & AI Tools](#mcp-plugin--ai-tools) ⭐ **New**
 - [Website](#website)
 
 ## Quick Start
@@ -149,6 +151,175 @@ If you are migrating an existing site or moving content to a new URL, you can us
 We have configured [Scheduled Publish](https://payloadcms.com/docs/versions/drafts#scheduled-publish) which uses the [jobs queue](https://payloadcms.com/docs/jobs-queue/jobs) in order to publish or unpublish your content on a scheduled time. The tasks are run on a cron schedule and can also be run as a separate instance if needed.
 
 > Note: When deployed on Vercel, depending on the plan tier, you may be limited to daily cron only.
+
+## MCP Plugin & AI Tools
+
+This template includes the official [`@payloadcms/plugin-mcp`](https://payloadcms.com/docs/plugins/mcp) which enables **AI-powered content management** through the [Model Context Protocol](https://modelcontextprotocol.io). The MCP plugin exposes your CMS to AI assistants like Claude Desktop, allowing for intelligent, conversational content operations.
+
+### What is MCP?
+
+The Model Context Protocol (MCP) is an open standard that lets AI assistants connect to your tools and data sources. With MCP, you can have natural conversations with AI about your content, and the AI can directly query, analyze, and update your CMS.
+
+### Custom AI Tools
+
+This template comes pre-configured with custom AI tools that demonstrate advanced content management capabilities:
+
+#### 🔗 Audit Post Relationships
+
+**Tool**: `auditPostRelationships`
+**Purpose**: Automatically find and fix posts with missing categories or related post links
+
+**What it does**:
+- Analyzes all your blog posts to check for proper categorization and internal linking
+- Categorizes posts by severity: Missing Both (🔴), Missing Categories (🟡), Missing Related Posts (🟠), Complete (✅)
+- Calculates an overall relationship health score
+- Can automatically suggest and apply fixes using intelligent keyword matching
+
+**How to use**:
+```typescript
+// Via MCP client (e.g., Claude Desktop)
+"Audit my post relationships"
+
+// Via Dashboard Widget
+// Navigate to Dashboard → "Post Relationships Health" widget → Click "Run Audit"
+
+// Via Environment Variables (on startup)
+RUN_AUDIT_JOB=1 AUDIT_AUTO_FIX=1 pnpm dev
+
+// Via API endpoint
+POST /api/audit-posts
+{
+  "limit": 50,
+  "includeUnpublished": false,
+  "autoFix": true
+}
+```
+
+**Implementation**:
+- `/src/jobs/auditPostRelationships.ts` - Core audit logic with smart suggestion algorithms
+- `/src/jobs/auditPostRelationshipsJob.ts` - Payload Job wrapper
+- `/src/app/(payload)/api/audit-posts/route.ts` - Custom API endpoint for dashboard widget
+- `/src/components/PostRelationshipsAuditDashboard.tsx` - Visual dashboard widget
+
+**Example output**:
+```markdown
+# 🔗 Post Relationships Audit Report
+Total Posts Audited: 47
+Overall Relationship Score: 74/100
+
+Executive Summary:
+- ✅ Complete: 35 posts (74%)
+- 🟠 Missing Related Posts: 4 posts (9%)
+- 🟡 Missing Categories: 5 posts (11%)
+- 🔴 Missing Both: 3 posts (6%)
+```
+
+#### 📊 Analyze Content Health
+
+**Tool**: `analyzeContentHealth`
+**Purpose**: Comprehensive content audit with SEO, freshness, and quality metrics
+
+**What it does**:
+- Analyzes reading time, content length, sentiment, and freshness
+- Identifies critical issues (missing meta descriptions, poor titles)
+- Detects high-priority problems (outdated content, missing images)
+- Suggests medium-priority improvements (content refresh needed)
+- Provides strategic insights (topic overlap, content gaps, performance patterns)
+
+**How to use**:
+```typescript
+// Via MCP client
+"Analyze the health of my blog content"
+"Show me posts that need urgent attention"
+```
+
+#### 📝 Additional AI Tools
+
+**Draft Release Notes** (`draftReleaseNotes`)
+- Summarizes recent posts with 3 bullet points each
+- Perfect for newsletters or changelogs
+
+**Suggest SEO Metadata** (`suggestSEOMetadata`)
+- Analyzes post content and generates SEO-optimized titles and descriptions
+- Follows best practices (50-60 char titles, 150-160 char descriptions)
+- Provides multiple alternatives with character counts
+
+**Summarize Post by Slug** (`summarizePostBySlug`)
+- Generates comprehensive summaries of individual posts
+- Extracts key takeaways and content overview
+
+### Dashboard Widget
+
+The Post Relationships Audit tool is also available as a **visual dashboard widget** in the Payload Admin:
+
+1. Log into Payload Admin
+2. Navigate to Dashboard
+3. Find the "📊 Post Relationships Health" widget
+4. Click "Run Audit" (read-only) or "Run & Auto-Fix" (updates posts)
+5. View results with color-coded breakdown and health score
+
+### Using with Claude Desktop
+
+To use these tools with Claude Desktop (requires MCP support):
+
+1. Configure Claude Desktop to connect to your Payload instance
+2. Start a conversation: "What content tools do I have available?"
+3. Claude will list all available MCP tools including the custom ones
+4. Use natural language: "Audit my posts and fix any relationship issues"
+
+**Example conversation**:
+```
+You: "Audit my post relationships"
+
+Claude: [Analyzes your posts using the audit tool]
+"I found 47 posts. 35 are properly connected (74% health score),
+but 3 posts are completely isolated with no categories or related posts.
+Would you like me to fix them?"
+
+You: "Yes, fix the isolated posts"
+
+Claude: [Applies intelligent suggestions]
+"Done! I've assigned relevant categories based on their content
+and linked them to related posts on similar topics."
+```
+
+### Technical Details
+
+The MCP plugin configuration is in [`src/payload.config.ts`](./src/payload.config.ts):
+
+```typescript
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
+
+export default buildConfig({
+  plugins: [
+    mcpPlugin({
+      collections: {
+        posts: {
+          description: 'Company blog posts that can be audited',
+          enabled: { find: true, update: true },
+        },
+      },
+      mcp: {
+        tools: [
+          // Custom AI tools defined here
+          // auditPostRelationships, analyzeContentHealth, etc.
+        ],
+      },
+    }),
+  ],
+})
+```
+
+**Key Features**:
+- Built on Payload's Jobs system for robust background processing
+- Extensible: add your own custom tools with Zod schema validation
+- Works with any MCP-compatible AI client
+- Can be triggered via API, dashboard, cron, or conversational AI
+
+For more details, see:
+- [AUDIT_POST_RELATIONSHIPS_GUIDE.md](./AUDIT_POST_RELATIONSHIPS_GUIDE.md) - Detailed implementation guide
+- [Payload MCP Plugin Docs](https://payloadcms.com/docs/plugins/mcp)
+- [Model Context Protocol](https://modelcontextprotocol.io)
 
 ## Website
 
