@@ -114,12 +114,10 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
-    releaseNotesPreview: ReleaseNotesPreview;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
-    releaseNotesPreview: ReleaseNotesPreviewSelect<false> | ReleaseNotesPreviewSelect<true>;
   };
   locale: null;
   user:
@@ -455,6 +453,7 @@ export interface Category {
 export interface User {
   id: string;
   name?: string | null;
+  roles: ('admin' | 'public')[];
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -916,28 +915,6 @@ export interface PayloadMcpApiKey {
      * Allow clients to update posts.
      */
     update?: boolean | null;
-  };
-  custom?: {
-    /**
-     * Analyze and summarize the latest posts with 3 bullet points each
-     */
-    draftReleaseNotes?: boolean | null;
-    /**
-     * Analyze and summarize a single post by its slug
-     */
-    summarizePostBySlug?: boolean | null;
-    /**
-     * Analyze a post and suggest SEO-friendly meta title and description
-     */
-    suggestSEOMetadata?: boolean | null;
-    /**
-     * Comprehensive content audit of all published posts with actionable insights
-     */
-    analyzeContentHealth?: boolean | null;
-    /**
-     * Audit blog posts to ensure they have categories assigned and related posts linked
-     */
-    auditPostRelationships?: boolean | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1452,6 +1429,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  roles?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1675,15 +1653,6 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
         find?: T;
         update?: T;
       };
-  custom?:
-    | T
-    | {
-        draftReleaseNotes?: T;
-        summarizePostBySlug?: T;
-        suggestSEOMetadata?: T;
-        analyzeContentHealth?: T;
-        auditPostRelationships?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -1833,18 +1802,6 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "releaseNotesPreview".
- */
-export interface ReleaseNotesPreview {
-  id: string;
-  latestText?: string | null;
-  limit?: number | null;
-  generatedAt?: string | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1885,18 +1842,6 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "releaseNotesPreview_select".
- */
-export interface ReleaseNotesPreviewSelect<T extends boolean = true> {
-  latestText?: T;
-  limit?: T;
-  generatedAt?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
