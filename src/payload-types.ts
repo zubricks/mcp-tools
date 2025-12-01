@@ -916,6 +916,16 @@ export interface PayloadMcpApiKey {
      */
     update?: boolean | null;
   };
+  categories?: {
+    /**
+     * Allow clients to find categories.
+     */
+    find?: boolean | null;
+    /**
+     * Allow clients to update categories.
+     */
+    update?: boolean | null;
+  };
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -1648,6 +1658,12 @@ export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
   label?: T;
   description?: T;
   posts?:
+    | T
+    | {
+        find?: T;
+        update?: T;
+      };
+  categories?:
     | T
     | {
         find?: T;
